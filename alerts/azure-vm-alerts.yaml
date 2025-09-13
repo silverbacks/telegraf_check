@@ -1,0 +1,93 @@
+groups:
+- name: azure.vm.alerts
+  rules:
+  - alert: AzureVMFreezeEvent
+    expr: azure_vm_freeze_event == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Azure VM Freeze Event Detected"
+      description: "An Azure VM freeze event has been detected on instance {{ $labels.instance }}. Maintenance is scheduled for this VM."
+
+  - alert: AzureVMRebootEvent
+    expr: azure_vm_reboot_event == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Azure VM Reboot Event Detected"
+      description: "An Azure VM reboot event has been detected on instance {{ $labels.instance }}. Maintenance is scheduled for this VM."
+
+  - alert: AzureVMRedeployEvent
+    expr: azure_vm_redeploy_event == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Azure VM Redeploy Event Detected"
+      description: "An Azure VM redeploy event has been detected on instance {{ $labels.instance }}. Maintenance is scheduled for this VM."
+
+  - alert: HighCPULoad
+    expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High CPU load on {{ $labels.instance }}"
+      description: "{{ $labels.instance }} has had high CPU load for more than 5 minutes."
+
+  - alert: HighMemoryUsage
+    expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Memory Usage on {{ $labels.instance }}"
+      description: "{{ $labels.instance }} has had high memory usage for more than 5 minutes."
+
+  - alert: DiskSpaceLow
+    expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 90
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Disk space low on {{ $labels.instance }}"
+      description: "{{ $labels.instance }} has less than 10% disk space available."
+
+  - alert: HighDiskIO
+    expr: irate(node_disk_io_time_seconds_total[5m]) > 0.9
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Disk I/O on {{ $labels.instance }}"
+      description: "{{ $labels.instance }} has had high disk I/O for more than 5 minutes."
+
+  - alert: NetworkInterfaceDown
+    expr: node_network_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Network interface down on {{ $labels.instance }}"
+      description: "Network interface is down on {{ $labels.instance }}."
+
+  - alert: SystemdServiceDown
+    expr: node_systemd_unit_state{state="active"} != 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Systemd service down on {{ $labels.instance }}"
+      description: "Systemd service {{ $labels.name }} is not active on {{ $labels.instance }}."
+      
+  - alert: TelegrafAgentDown
+    # Check if Telegraf is writing metrics - if no metrics written in 2 minutes, trigger alert
+    expr: rate(internal_agent_metrics_written[2m]) == 0
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Telegraf agent is not sending metrics from {{ $labels.instance }}"
+      description: "Telegraf agent on {{ $labels.instance }} has not written any metrics in the last 2 minutes. The agent may be down or experiencing issues."

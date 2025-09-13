@@ -1,0 +1,9 @@
+[Unit]
+Description=Azure VM Freeze Monitor
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/azure_vm_freeze_monitor.sh
+User=root
+Group=root

@@ -1,0 +1,198 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Azure VM Linux Monitoring",
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "30s",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "CPU Usage",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{job=\"telegraf\",mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "CPU Usage %",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Memory Usage",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percent",
+            "label": "Memory Usage %",
+            "min": 0,
+            "max": 100
+          },
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Disk I/O",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "irate(node_disk_reads_completed_total[5m])",
+            "legendFormat": "{{instance}} - {{device}} - Reads",
+            "refId": "A"
+          },
+          {
+            "expr": "irate(node_disk_writes_completed_total[5m])",
+            "legendFormat": "{{instance}} - {{device}} - Writes",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "iops",
+            "label": "Operations per second"
+          },
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "type": "graph",
+        "title": "Network Traffic",
+        "gridPos": {
+          "x": 12,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "irate(node_network_receive_bytes_total{device!~\"lo\"}[5m])",
+            "legendFormat": "{{instance}} - {{device}} - RX",
+            "refId": "A"
+          },
+          {
+            "expr": "irate(node_network_transmit_bytes_total{device!~\"lo\"}[5m])",
+            "legendFormat": "{{instance}} - {{device}} - TX",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "Bps",
+            "label": "Bytes per second"
+          },
+          {
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "title": "Disk Space Usage",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "(node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100",
+            "legendFormat": "{{instance}} - {{mountpoint}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "fieldOptions": {
+            "calcs": ["last"]
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "Azure VM Freeze Events",
+        "gridPos": {
+          "x": 12,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "azure_vm_freeze_event",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "fieldOptions": {
+            "calcs": ["last"]
+          }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "instance",
+          "type": "query",
+          "datasource": "Prometheus",
+          "label": "Instance",
+          "multi": true,
+          "query": "label_values(up{job=\"telegraf\"}, instance)"
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Azure VM Freeze Events",
+          "datasource": "Prometheus",
+          "expr": "azure_vm_freeze_event == 1",
+          "titleFormat": "Freeze Event",
+          "tagKeys": "instance",
+          "textFormat": "Azure VM Freeze Event Detected"
+        }
+      ]
+    }
+  }
+}
