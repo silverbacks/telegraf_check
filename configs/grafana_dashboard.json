@@ -168,6 +168,92 @@
             "calcs": ["last"]
           }
         }
+      },
+      {
+        "type": "stat",
+        "title": "VM Information",
+        "gridPos": {
+          "x": 0,
+          "y": 24,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "azure_vm_metadata",
+            "legendFormat": "{{compute_name}} ({{compute_vmSize}})",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "fieldOptions": {
+            "calcs": ["last"]
+          }
+        }
+      },
+      {
+        "type": "stat",
+        "title": "VM Location",
+        "gridPos": {
+          "x": 12,
+          "y": 24,
+          "w": 12,
+          "h": 6
+        },
+        "targets": [
+          {
+            "expr": "azure_vm_metadata",
+            "legendFormat": "{{compute_location}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "fieldOptions": {
+            "calcs": ["last"]
+          }
+        }
+      },
+      {
+        "type": "table",
+        "title": "Azure Scheduled Events",
+        "gridPos": {
+          "x": 0,
+          "y": 30,
+          "w": 24,
+          "h": 8
+        },
+        "targets": [
+          {
+            "expr": "azure_scheduled_events",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "column": [
+            {
+              "text": "Event Type",
+              "value": "EventType"
+            },
+            {
+              "text": "Resource Type",
+              "value": "ResourceType"
+            },
+            {
+              "text": "Resources",
+              "value": "Resources"
+            },
+            {
+              "text": "Status",
+              "value": "Status"
+            },
+            {
+              "text": "Not Before",
+              "value": "NotBefore"
+            }
+          ]
+        }
       }
     ],
     "templating": {

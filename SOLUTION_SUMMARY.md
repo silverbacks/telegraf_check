@@ -25,7 +25,7 @@ This document provides an overview of the comprehensive monitoring solution for 
 - **Configuration**: `configs/azure_monitoring.conf`
 - **Purpose**: Detects Azure VM maintenance events through the Azure Instance Metadata Service
 - **Functionality**:
-  - Periodically checks for scheduled events (Freeze, Reboot, Redeploy)
+  - Periodically checks for scheduled events (Freeze, Reboot, Redeploy, Preempt, Terminate)
   - Reports all event types to Grafana Cloud
   - Logs event details for troubleshooting
 
@@ -134,10 +134,32 @@ This document provides an overview of the comprehensive monitoring solution for 
 - Enables proactive issue detection
 
 ### Azure-Specific Monitoring
-- Detects Azure VM maintenance events (Freeze, Reboot, Redeploy) before they impact services
+- Detects Azure VM maintenance events (Freeze, Reboot, Redeploy, Preempt, Terminate) before they impact services
 - Integrates with Azure Instance Metadata Service
 - Provides early warning of planned maintenance
 - **Configuration separated into dedicated file** - `configs/azure_monitoring.conf`
+
+### Metrics Visualization in Grafana
+
+The Azure monitoring configuration generates several types of metrics that appear in Grafana:
+
+1. **Azure VM Metadata Metrics** (`azure_vm_metadata`):
+   - Tags: location, name, osType, vmSize
+   - Fields: location, name, osType, vmSize (as strings)
+   - Use case: Inventory tracking, resource planning
+
+2. **Azure Scheduled Events Metrics** (`azure_scheduled_events`):
+   - Tags: EventType, ResourceType, Resources, EventStatus, EventSource
+   - Fields: EventId, Status, NotBefore, Description, EventSource, DurationInSeconds (timestamps and strings)
+   - Use case: Maintenance planning, impact assessment
+
+3. **Custom Maintenance Event Metrics**:
+   - `azure_vm_freeze_event` (gauge: 0 or 1)
+   - `azure_vm_reboot_event` (gauge: 0 or 1)
+   - `azure_vm_redeploy_event` (gauge: 0 or 1)
+   - `azure_vm_preempt_event` (gauge: 0 or 1)
+   - `azure_vm_terminate_event` (gauge: 0 or 1)
+   - Use case: Alerting, dashboard indicators
 
 ### Scalable Architecture
 - Designed to work with any number of Azure VMs
@@ -149,7 +171,7 @@ This document provides an overview of the comprehensive monitoring solution for 
 - Integration with Mimir for reliable alert processing
 - Configurable notification channels
 - **Telegraf agent monitoring** - Alerts when Telegraf stops working
-- **Azure VM maintenance event alerts** - Separate alerts for Freeze, Reboot, and Redeploy events
+- **Azure VM maintenance event alerts** - Separate alerts for Freeze, Reboot, Redeploy, Preempt, and Terminate events
 
 ### Easy Deployment
 - Automated deployment script simplifies setup

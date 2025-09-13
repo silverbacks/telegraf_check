@@ -58,6 +58,9 @@ The Azure-specific configuration (`configs/azure_monitoring.conf`) can be custom
      # Add or remove json_string_fields as needed
      json_string_fields = ["compute/location", "compute/name", "compute/osType", "compute/vmSize", "compute/tags"]
    ```
+   
+   In Grafana, these metrics will appear as `azure_vm_metadata` with tags for each field:
+   - `azure_vm_metadata{compute_location="eastus", compute_name="myvm", ...}`
 
 2. **Azure VM Maintenance Events**:
    The exec input plugin runs the Azure VM maintenance events script:
@@ -67,7 +70,11 @@ The Azure-specific configuration (`configs/azure_monitoring.conf`) can be custom
      data_format = "influx"
      interval = "60s"
    ```
-   You can adjust the interval to check for events more or less frequently.
+   
+   In Grafana, these metrics will appear as:
+   - `azure_vm_freeze_event` (gauge: 0 or 1)
+   - `azure_vm_reboot_event` (gauge: 0 or 1)
+   - `azure_vm_redeploy_event` (gauge: 0 or 1)
 
 3. **Scheduled Events Collection**:
    The HTTP input plugin collects Azure scheduled events:
@@ -79,6 +86,9 @@ The Azure-specific configuration (`configs/azure_monitoring.conf`) can be custom
      data_format = "json"
      json_query = "Events"
    ```
+   
+   In Grafana, these metrics will appear as `azure_scheduled_events` with tags for event details:
+   - `azure_scheduled_events{EventType="Freeze", ResourceType="VirtualMachine", ...}`
 
 ### Alert Rules
 

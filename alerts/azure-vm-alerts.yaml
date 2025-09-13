@@ -28,6 +28,24 @@ groups:
       summary: "Azure VM Redeploy Event Detected"
       description: "An Azure VM redeploy event has been detected on instance {{ $labels.instance }}. Maintenance is scheduled for this VM."
 
+  - alert: AzureVMPreemptEvent
+    expr: azure_vm_preempt_event == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Azure VM Preempt Event Detected"
+      description: "An Azure VM preempt event has been detected on instance {{ $labels.instance }}. This spot instance will be reclaimed."
+
+  - alert: AzureVMTerminateEvent
+    expr: azure_vm_terminate_event == 1
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Azure VM Terminate Event Detected"
+      description: "An Azure VM terminate event has been detected on instance {{ $labels.instance }}. This VM will be deleted."
+
   - alert: HighCPULoad
     expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
     for: 5m

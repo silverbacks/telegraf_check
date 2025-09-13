@@ -40,6 +40,8 @@ send_metric() {
 # TYPE azure_vm_freeze_event gauge
 # TYPE azure_vm_reboot_event gauge
 # TYPE azure_vm_redeploy_event gauge
+# TYPE azure_vm_preempt_event gauge
+# TYPE azure_vm_terminate_event gauge
 $metric_name $value $timestamp
 EOF
 
@@ -69,6 +71,8 @@ check_maintenance_events() {
         freeze_event=0
         reboot_event=0
         redeploy_event=0
+        preempt_event=0
+        terminate_event=0
         
         # Check for different types of events
         if echo "$scheduled_events" | jq -e '.Events[] | select(.EventType=="Freeze")' > /dev/null; then
@@ -107,13 +111,39 @@ check_maintenance_events() {
             log_message "Redeploy Event - Type: $event_type, Event ID: $event_id, Not Before: $not_before"
         fi
         
+        if echo "$scheduled_events" | jq -e '.Events[] | select(.EventType=="Preempt")' > /dev/null; then
+            log_message "Preempt event detected"
+            preempt_event=1
+            
+            # Extract preempt event details
+            event_type=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Preempt") | .EventType')
+            event_id=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Preempt") | .EventId')
+            not_before=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Preempt") | .NotBefore')
+            
+            log_message "Preempt Event - Type: $event_type, Event ID: $event_id, Not Before: $not_before"
+        fi
+        
+        if echo "$scheduled_events" | jq -e '.Events[] | select(.EventType=="Terminate")' > /dev/null; then
+            log_message "Terminate event detected"
+            terminate_event=1
+            
+            # Extract terminate event details
+            event_type=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Terminate") | .EventType')
+            event_id=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Terminate") | .EventId')
+            not_before=$(echo "$scheduled_events" | jq -r '.Events[] | select(.EventType=="Terminate") | .NotBefore')
+            
+            log_message "Terminate Event - Type: $event_type, Event ID: $event_id, Not Before: $not_before"
+        fi
+        
         # Send metrics for all event types
         send_metric "azure_vm_freeze_event" "$freeze_event" "$(date +%s)"
         send_metric "azure_vm_reboot_event" "$reboot_event" "$(date +%s)"
         send_metric "azure_vm_redeploy_event" "$redeploy_event" "$(date +%s)"
+        send_metric "azure_vm_preempt_event" "$preempt_event" "$(date +%s)"
+        send_metric "azure_vm_terminate_event" "$terminate_event" "$(date +%s)"
         
         # If no events detected, still send 0 values
-        if [[ $freeze_event -eq 0 && $reboot_event -eq 0 && $redeploy_event -eq 0 ]]; then
+        if [[ $freeze_event -eq 0 && $reboot_event -eq 0 && $redeploy_event -eq 0 && $preempt_event -eq 0 && $terminate_event -eq 0 ]]; then
             log_message "No maintenance events detected"
         fi
     else
@@ -123,10 +153,14 @@ check_maintenance_events() {
             echo "azure_vm_freeze_event value=0 $(date +%s)"
             echo "azure_vm_reboot_event value=0 $(date +%s)"
             echo "azure_vm_redeploy_event value=0 $(date +%s)"
+            echo "azure_vm_preempt_event value=0 $(date +%s)"
+            echo "azure_vm_terminate_event value=0 $(date +%s)"
         else
             send_metric "azure_vm_freeze_event" "0" "$(date +%s)"
             send_metric "azure_vm_reboot_event" "0" "$(date +%s)"
             send_metric "azure_vm_redeploy_event" "0" "$(date +%s)"
+            send_metric "azure_vm_preempt_event" "0" "$(date +%s)"
+            send_metric "azure_vm_terminate_event" "0" "$(date +%s)"
         fi
     fi
 }

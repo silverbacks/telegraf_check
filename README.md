@@ -34,6 +34,7 @@ This repository contains configuration files for comprehensive monitoring of RHE
 
 ### Visualization
 - Grafana dashboard: `configs/grafana_dashboard.json`
+- Sample Azure dashboard: `configs/sample_azure_dashboard.json`
 
 ### Documentation
 - Setup guide: `docs/grafana_cloud_setup.md`
@@ -121,6 +122,8 @@ The alert rules include:
 - Azure VM freeze events
 - Azure VM reboot events
 - Azure VM redeploy events
+- Azure VM preempt events
+- Azure VM terminate events
 - High CPU load
 - High memory usage
 - Low disk space
@@ -171,12 +174,34 @@ The Telegraf configuration collects the following metrics:
 
 ### Azure VM Maintenance Event Monitoring
 
-The script checks the Azure Instance Metadata Service for scheduled events and reports:
-- Freeze events
-- Reboot events
-- Redeploy events
+The Azure monitoring configuration collects several types of metrics:
 
-Each event type has its own metric and alert. This monitoring is configured in `configs/azure_monitoring.conf`.
+1. **Azure VM Metadata** - Static information about the VM:
+   - Location (region)
+   - Name
+   - OS Type
+   - VM Size
+   - These appear in Grafana as `azure_vm_metadata` with tags for each field
+
+2. **Azure Scheduled Events** - Information about upcoming maintenance:
+   - Event Type (Freeze, Reboot, Redeploy, Preempt, Terminate)
+   - Resource Type
+   - Resources (affected VM names)
+   - Event ID
+   - Status
+   - NotBefore timestamp
+   - Description
+   - Event Source (Platform or User)
+   - Duration in seconds
+   - These appear in Grafana as `azure_scheduled_events` with tags for event details
+
+3. **Custom Maintenance Events** - Detected by our script:
+   - Freeze events (`azure_vm_freeze_event`)
+   - Reboot events (`azure_vm_reboot_event`)
+   - Redeploy events (`azure_vm_redeploy_event`)
+   - Preempt events (`azure_vm_preempt_event`)
+   - Terminate events (`azure_vm_terminate_event`)
+   - These appear in Grafana as gauge metrics with values of 0 or 1
 
 ### Alert Rules
 
@@ -185,6 +210,8 @@ The alert rules cover:
 - Azure VM freeze events
 - Azure VM reboot events
 - Azure VM redeploy events
+- Azure VM preempt events
+- Azure VM terminate events
 - High CPU load
 - High memory usage
 - Low disk space

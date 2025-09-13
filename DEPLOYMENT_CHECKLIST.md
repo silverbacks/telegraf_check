@@ -94,8 +94,12 @@ This checklist helps ensure that all components of the monitoring solution are p
 ### 2. Metrics Verification
 
 - [ ] Check that system metrics are being collected (CPU, memory, disk, network)
-- [ ] Verify that Azure VM metadata is being collected
-- [ ] Confirm that Azure maintenance events are being monitored
+- [ ] Verify that Azure VM metadata is being collected:
+  - In Grafana, query: `azure_vm_metadata`
+- [ ] Confirm that Azure scheduled events are being monitored:
+  - In Grafana, query: `azure_scheduled_events`
+- [ ] Confirm that custom Azure maintenance events are being monitored:
+  - In Grafana, query: `azure_vm_freeze_event`, `azure_vm_reboot_event`, `azure_vm_redeploy_event`
 - [ ] **Validate that the `internal_agent_metrics_written` metric is being generated**
 - [ ] **Confirm that all VMs are appearing in the dashboard**
 
@@ -143,6 +147,10 @@ If metrics are not appearing in Grafana:
 - [ ] Check firewall rules
 - [ ] **Verify that the `internal_agent_metrics_written` metric is being generated**
 - [ ] **Verify that Azure VM maintenance events are being detected**
+- [ ] **Check that Azure VM metadata is being collected**:
+  - In Grafana, query: `azure_vm_metadata`
+- [ ] **Check that Azure scheduled events are being collected**:
+  - In Grafana, query: `azure_scheduled_events`
 
 If alerts are not firing:
 

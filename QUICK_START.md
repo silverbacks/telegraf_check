@@ -128,7 +128,7 @@ After successful deployment, you should see:
 
 1. **In Grafana Dashboards**:
    - CPU, memory, disk, and network metrics from your VMs
-   - Azure VM metadata information
+   - Azure VM metadata information (location, name, OS type, VM size)
    - Periodic data points (every 10 seconds by default)
    - **Telegraf internal metrics indicating Telegraf is running**
    - **Azure VM maintenance events (Freeze, Reboot, Redeploy)**
@@ -142,6 +142,24 @@ After successful deployment, you should see:
    - Running Telegraf service
    - Active Azure maintenance events monitor timer
    - Log files in `/var/log/azure_vm_freeze_monitor.log`
+
+## Metrics in Grafana
+
+The Azure monitoring configuration generates several types of metrics:
+
+1. **Azure VM Metadata** (`azure_vm_metadata`):
+   - Tags: location, name, osType, vmSize
+   - Use for inventory tracking and resource planning
+
+2. **Azure Scheduled Events** (`azure_scheduled_events`):
+   - Tags: EventType, ResourceType, Resources
+   - Use for maintenance planning and impact assessment
+
+3. **Custom Maintenance Events**:
+   - `azure_vm_freeze_event` (0 or 1)
+   - `azure_vm_reboot_event` (0 or 1)
+   - `azure_vm_redeploy_event` (0 or 1)
+   - Use for alerting and dashboard indicators
 
 ## Troubleshooting Quick Fixes
 
